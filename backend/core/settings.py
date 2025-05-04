@@ -10,7 +10,7 @@ SECRET_KEY = 'django-insecure-d38h6#9r*ws(3p8fgfj*vm=_07p_zd_6hxx7ivv&qsd!ayr976
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'https://first-task-manadger-611f429dba7c.herokuapp.com/']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'https://stuck.onrender.com/']
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
@@ -18,7 +18,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:5173",
     "http://localhost:5173",
-    "https://first-task-manadger-611f429dba7c.herokuapp.com/",
+    "https://stuck.onrender.com/",
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = False
@@ -27,7 +27,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://first-task-manadger-611f429dba7c.herokuapp.com/",
+    "https://stuck.onrender.com/",
 ]
 
 # Session settings
@@ -41,7 +41,8 @@ SESSION_SAVE_EVERY_REQUEST = True
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'core.apps.CoreConfig',
+    #'core.apps.CoreConfig',
+    'backend.core',
     'project.apps.ProjectConfig',
     'task.apps.TaskConfig',
     'comment.apps.CommentConfig',
@@ -58,7 +59,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Добавьте для продакшена
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
