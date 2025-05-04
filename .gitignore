@@ -9,7 +9,7 @@ venv/
 *.env
 migrations/
 *.db
-media/
+# media/
 
 # Django REST Framework
 *.cache
