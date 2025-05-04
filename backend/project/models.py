@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import User
+from .models import User
 
 class Project(models.Model):
     title = models.CharField(max_length=200)
