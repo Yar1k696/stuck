@@ -1,1 +1,1 @@
-echo "web: gunicorn backend.your_project_name.wsgi --log-file -" > Procfile
+web: gunicorn backend.your_project_name.wsgi --log-file -
