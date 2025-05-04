@@ -41,8 +41,8 @@ SESSION_SAVE_EVERY_REQUEST = True
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
-    #'core.apps.CoreConfig',
-    'backend.core',
+    'core.apps.CoreConfig',
+    # 'backend.core',
     'project.apps.ProjectConfig',
     'task.apps.TaskConfig',
     'comment.apps.CommentConfig',
@@ -78,7 +78,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-ROOT_URLCONF = 'backend.core.urls'
+ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
     {
