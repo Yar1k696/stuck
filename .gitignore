@@ -1,0 +1,53 @@
+# Python/Django
+*.pyc
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+.env
+venv/
+*.env
+migrations/
+*.db
+media/
+
+# Django REST Framework
+*.cache
+*.egg-info/
+
+# React/Node.js
+node_modules/
+dist/
+build/
+npm-debug.log
+yarn-error.log
+*.log
+
+# Редактори
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+
+# Heroku
+*.heroku
+Procfile
+*.slugignore
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+
+*.bak
+*.swp
+*.swo
+*.tmp
+temp/
+*.temp

@@ -1,0 +1,55 @@
+#root .card.tasks-list {
+  border: 0;
+  height: 100vh;
+}
+
+#root .card.tasks-list .car-body {
+  padding: 0;
+}
+
+.bg-dark-blue {
+  background: #203c54;
+}
+
+#root .bg-dark-blue .navbar-toggler {
+  background: #fff;
+}
+
+#root .site-logo {
+  margin-right: auto !important;
+}
+
+.bg-dark-blue .btn-add {
+  background: #f1f1f1;
+  color: #000;
+}
+.bg-dark-blue .btn-add:hover {
+  background: #b8b8b8;
+  color: #000;
+}
+
+.task-column-done .project-column-heading {
+  background: #50C878;
+  color: #fff;
+}
+.task-column-in_progress .project-column-heading {
+  background: #FFA500;
+  color: #fff;
+}
+.task-column-needs_review .project-column-heading {
+  background: #F4D03F;
+  color: #fff;
+}
+.task-column-todo .project-column-heading {
+  background: #4A90E2;
+  color: #fff;
+}
+.project-column .dropdown-toggle::after {
+  display: none;
+}
+@media (width < 996px) {
+  .team {
+    padding: 15px 0;
+    justify-content: center;
+  }
+}
