@@ -77,7 +77,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-ROOT_URLCONF = 'core.urls'
+ROOT_URLCONF = 'backend.core.urls'
 
 TEMPLATES = [
     {
