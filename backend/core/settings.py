@@ -40,6 +40,7 @@ SESSION_SAVE_EVERY_REQUEST = True
 INSTALLED_APPS = [
     'django.contrib.admin',
     'core.apps.CoreConfig',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'project.apps.ProjectConfig',
     'task.apps.TaskConfig',
     'comment.apps.CommentConfig',
