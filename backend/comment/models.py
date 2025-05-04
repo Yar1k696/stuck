@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import User
+from backend.core.models import User
 
 class Comment(models.Model):
     project = models.ForeignKey(
