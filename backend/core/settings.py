@@ -18,7 +18,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://localhost:3000",
     "http://127.0.0.1:5173",
-    "http://localhost:5173",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:3000",
     "https://stuck-k2od.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
@@ -27,13 +28,17 @@ CORS_ALLOW_ALL_ORIGINS = False
 # CSRF settings
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:8000",
+    "http://localhost:3000",
     "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:3000",
     "https://stuck-k2od.onrender.com",
 ]
 
 # Session settings
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
-SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 1209600
@@ -146,5 +151,4 @@ STATICFILES_STORAGE = (
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SESSION_COOKIE_SAMESITE = "Lax"
-SESSION_COOKIE_SECURE = True
+CORS_ALLOW_ALL_ORIGINS = True
