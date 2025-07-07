@@ -73,14 +73,12 @@ const RegisterPage = () => {
       }
 
       const data = await response.json();
-      console.log('Успішна реєстрація:', data);
 
       // Логіка після успішної реєстрації
       alert('Реєстрація успішна! Тепер увійдіть.');
       navigate('/login');
 
     } catch (e) {
-      console.error('Помилка реєстрації:', e);
       setError(e.message || 'Не вдалося створити акаунт. Спробуйте ще.');
     } finally {
       setLoading(false);

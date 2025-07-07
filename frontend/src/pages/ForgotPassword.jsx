@@ -23,7 +23,6 @@ const ForgotPassword = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-           // Можливо, потрібно додати заголовок CSRF-токена
            // 'X-CSRFToken': 'ваш_csrf_токен',
         },
         body: JSON.stringify({ email }), // Відправляємо email
@@ -39,7 +38,6 @@ const ForgotPassword = () => {
        // Якщо відповідь OK (наприклад, 200 OK або 204 No Content, залежно від API)
        // Не завжди повертає тіло, але може бути повідомлення
        const data = await response.json().catch(() => null); // Спробуємо прочитати, але не кидаємо помилку, якщо тіла немає
-       console.log('Скидання пароля запитано:', data);
 
 
       setMessage('Перевірте вашу пошту для подальших інструкцій.'); // Повідомлення про успіх

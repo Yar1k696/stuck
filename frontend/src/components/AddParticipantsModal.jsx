@@ -44,7 +44,6 @@ const AddParticipantsModal = ({ show, onHide, onParticipantsSubmit, projectId })
 
           const usersData = await usersResponse.json();
 
-          // Получаем текущих участников проекта
           const membersResponse = await fetch(`http://localhost:8000/api/projects/${projectId}/members/`, {
             method: 'GET',
             headers: {
@@ -59,7 +58,7 @@ const AddParticipantsModal = ({ show, onHide, onParticipantsSubmit, projectId })
           }
 
           const membersData = await membersResponse.json();
-          const memberUserIds = membersData.map(member => member.user.id); // ID пользователей, уже добавленных
+          const memberUserIds = membersData.map(member => member.user.id);
           const ownerUserIds = membersData
             .filter(member => member.role === 'OWNER')
             .map(member => member.user.id); // ID владельцев
@@ -130,7 +129,6 @@ const AddParticipantsModal = ({ show, onHide, onParticipantsSubmit, projectId })
         handleClose();
       }, 1500);
     } catch (e) {
-      console.error('Error adding participants:', e);
       setSubmitError(e.message);
     } finally {
       setLoadingSubmit(false);
@@ -149,7 +147,7 @@ const AddParticipantsModal = ({ show, onHide, onParticipantsSubmit, projectId })
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Добавить учасників</Modal.Title>
+        <Modal.Title>Додати учасників до проекту</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {participantsError && <Alert variant="warning">{participantsError}</Alert>}

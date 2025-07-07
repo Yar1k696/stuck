@@ -5,18 +5,18 @@ import {
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faFlag, faTrashAlt, faExchangeAlt 
+  faFlag, faTrashAlt, faExchangeAlt, faUser 
 } from '@fortawesome/free-solid-svg-icons';
 
 function getCookie(name) {
-    const cookieValue = document.cookie
-      .split('; ')
-      .find(row => row.startsWith(name + '='))
-      ?.split('=')[1];
-    return cookieValue || '';
+  const cookieValue = document.cookie
+    .split('; ')
+    .find(row => row.startsWith(name + '='))
+    ?.split('=')[1];
+  return cookieValue || '';
 }
 
-const csrfToken = getCookie('csrftoken'); 
+const csrfToken = getCookie('csrftoken');
 
 const TaskActionsDropdown = ({ task, currentStatus, onStatusChange, onDelete }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -29,7 +29,7 @@ const TaskActionsDropdown = ({ task, currentStatus, onStatusChange, onDelete }) 
     'NEEDS_REVIEW': 'Потребують перевірки',
     'DONE': 'Виконано'
   };
- 
+
   const availableStatuses = Object.keys(statusOptions)
     .filter(status => status !== currentStatus)
     .map(status => ({
@@ -123,16 +123,7 @@ const TaskActionsDropdown = ({ task, currentStatus, onStatusChange, onDelete }) 
   );
 };
 
-const TaskColumn = ({ title, tasks, status, onStatusChange, onDelete }) => {
-  // const getTagVariant = (tag) => {
-  //   const variants = {
-  //     'Копірайтинг': 'warning',
-  //     'UI Дизайн': 'primary',
-  //     'Ілюстрація': 'success',
-  //   };
-  //   return variants[tag] || 'secondary';
-  // };
-
+const TaskColumn = ({ title, tasks, status, onStatusChange, onDelete, users }) => {
   const headerClass = {
     'TODO': 'to-do',
     'IN_PROGRESS': 'in-progress',
@@ -141,6 +132,12 @@ const TaskColumn = ({ title, tasks, status, onStatusChange, onDelete }) => {
   }[status] || '';
 
   const safeTasks = Array.isArray(tasks) ? tasks : [];
+
+  const getAssigneeName = (assignedToId) => {
+    if (!assignedToId) return '*';
+    const user = users.find(user => user.id === assignedToId);
+    return user ? user.username : '*';
+  };
 
   return (
     <Card className={`project-column mb-3 task-column-${status.toLowerCase()}`}>
@@ -159,14 +156,11 @@ const TaskColumn = ({ title, tasks, status, onStatusChange, onDelete }) => {
                   onDelete={onDelete}
                 />
               </div>
-              {/* <div className="d-flex justify-content-between mb-2">
-                {task.tag && (
-                  <Stack direction="horizontal" gap={2}>
-                    <Badge bg={getTagVariant(task.tag)}>{task.tag}</Badge>
-                  </Stack>
-                )}
-              </div> */}
-              <p className="mb-3 task-description">{task.description || 'Без опису'}</p>
+              <p className="mb-2 task-description">{task.description || 'Без опису'}</p>
+              <p className="mb-2 text-muted">
+                <FontAwesomeIcon icon={faUser} className="me-2" />
+                Виконавець: {getAssigneeName(task.assigned_to)}
+              </p>
               {task.due_date && (
                 <Stack direction="horizontal" gap={3} className="task-stats">
                   <small>
@@ -184,9 +178,10 @@ const TaskColumn = ({ title, tasks, status, onStatusChange, onDelete }) => {
   );
 };
 
-const TasksBoard = ({ projectId, userId }) => {
+const TasksBoard = ({ projectId, userId, refreshTasks }) => {
   const [allTasks, setAllTasks] = useState([]);
   const [groupedTasks, setGroupedTasks] = useState({});
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -228,14 +223,37 @@ const TasksBoard = ({ projectId, userId }) => {
         }
       } else {
         const data = await response.json();
-        setAllTasks(Array.isArray(data) ? data : []);
+        const normalizedTasks = data.map(task => ({
+          ...task,
+          status: task.status ? task.status.toUpperCase() : 'TODO' // Нормализация статуса
+        }));
+        setAllTasks(normalizedTasks);
       }
     } catch (e) {
       console.error("Failed to fetch tasks:", e);
       setError(e.message || "Не вдалося завантажити список завдань.");
-      setAllTasks([]); 
+      setAllTasks([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/users/', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Не вдалося завантажити користувачів');
+      }
+      const data = await response.json();
+      console.log('Users fetched:', data);
+      setUsers(data);
+    } catch (e) {
+      console.error('Error fetching users:', e);
+      setError('Не вдалося завантажити користувачів');
     }
   };
 
@@ -282,8 +300,11 @@ const TasksBoard = ({ projectId, userId }) => {
   };
 
   useEffect(() => {
-    fetchTasks();
-  }, [projectId, userId]);
+    if (projectId || userId) {
+      fetchTasks();
+      fetchUsers();
+    }
+  }, [projectId, userId, refreshTasks]);
 
   useEffect(() => {
     if (allTasks && Array.isArray(allTasks)) {
@@ -341,6 +362,7 @@ const TasksBoard = ({ projectId, userId }) => {
               status={status}
               onStatusChange={handleStatusChange}
               onDelete={handleDeleteTask}
+              users={users}
             />
           </Col>
         ))}

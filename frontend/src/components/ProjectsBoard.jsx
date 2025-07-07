@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Container, Row, Col, Card, Button, Spinner, Alert, Badge
-} from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faPlus, faUsers, faCalendarAlt, faUser 
-} from '@fortawesome/free-solid-svg-icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
+import { useTaskContext } from '../TaskContext';
+import AddProjectModal from '../components/AddProjectModal';
 
 function getCookie(name) {
   const cookieValue = document.cookie
@@ -19,16 +17,10 @@ function getCookie(name) {
 const csrfToken = getCookie('csrftoken');
 
 const ProjectsBoard = ({ userId }) => {
+  const { refreshProjects, setRefreshProjects, showProjectModal, setShowProjectModal } = useTaskContext();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
-  const roleBadgeVariant = {
-    'OWNER': 'danger',
-    'ADMIN': 'warning',
-    'MEMBER': 'primary'
-  };
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -36,27 +28,20 @@ const ProjectsBoard = ({ userId }) => {
     try {
       const response = await fetch(`http://localhost:8000/api/projects/?user=${userId}`, {
         method: 'GET',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken 
+          'X-CSRFToken': csrfToken,
         },
         credentials: 'include',
       });
-
       if (!response.ok) {
         const errorText = await response.text();
-        if (response.status === 403) {
-          setError('Доступ заборонено. Будь ласка, увійдіть в систему.');
-        } else {
-          throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
-        }
-      } else {
-        const data = await response.json();
-        setProjects(data);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
+      const data = await response.json();
+      setProjects(data);
     } catch (e) {
-      console.error("Failed to fetch projects:", e);
-      setError(e.message || "Не вдалося завантажити список проектів.");
+      setError(e.message || 'Не вдалося завантажити список проектів.');
     } finally {
       setLoading(false);
     }
@@ -66,7 +51,13 @@ const ProjectsBoard = ({ userId }) => {
     if (userId) {
       fetchProjects();
     }
-  }, [userId]);
+  }, [userId, refreshProjects]);
+
+  const handleProjectSubmit = (newProject) => {
+    setProjects(prev => [...prev, newProject]);
+    setShowProjectModal(false);
+    setRefreshProjects(true); // Обновляем проекты
+  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('uk-UA');
@@ -86,7 +77,7 @@ const ProjectsBoard = ({ userId }) => {
     return (
       <Container className="mt-5">
         <Alert variant="danger">
-          {error} 
+          {error}
           <Button variant="link" onClick={fetchProjects}>
             Спробувати ще
           </Button>
@@ -97,7 +88,6 @@ const ProjectsBoard = ({ userId }) => {
 
   return (
     <Container className="mt-4">
-
       <Row xs={1} md={2} lg={3} className="g-4">
         {projects.map(project => (
           <Col key={project.id}>
@@ -107,15 +97,10 @@ const ProjectsBoard = ({ userId }) => {
                   <Card.Title>
                     <Link to={`/project/${project.id}`}>{project.title}</Link>
                   </Card.Title>
-                  {/* <Badge bg={roleBadgeVariant[project.user_role] || 'secondary'}>
-                    {project.user_role}
-                  </Badge> */}
                 </div>
-                
                 <Card.Text className="text-muted mb-3">
                   {project.description || 'Без опису'}
                 </Card.Text>
-
                 <div className="text-muted small">
                   <div>
                     <FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
@@ -126,26 +111,23 @@ const ProjectsBoard = ({ userId }) => {
             </Card>
           </Col>
         ))}
-
         {projects.length === 0 && (
           <Col>
             <Card>
               <Card.Body className="text-center">
                 <Card.Text className="text-muted">
-                  У вас ще немає проектів. Створіть перший проект!
+                  У вас ще немає проектів. Натисніть "Додати проект" у меню.
                 </Card.Text>
-                <Button 
-                  variant="primary" 
-                  onClick={() => navigate('/projects/create')}
-                >
-                  <FontAwesomeIcon icon={faPlus} className="me-2" />
-                  Створити проект
-                </Button>
               </Card.Body>
             </Card>
           </Col>
         )}
       </Row>
+      <AddProjectModal
+        show={showProjectModal}
+        onHide={() => setShowProjectModal(false)}
+        onProjectSubmit={handleProjectSubmit}
+      />
     </Container>
   );
 };

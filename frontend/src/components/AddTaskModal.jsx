@@ -12,11 +12,10 @@ function getCookie(name) {
 const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
   const [taskData, setTaskData] = useState({
     description: '',
-    assigned_to: '',
-    due_date: ''
+    assigned_to: '', // Основной участник
   });
   const [participants, setParticipants] = useState([]);
-  const [selectedParticipants, setSelectedParticipants] = useState([]);
+  const [selectedParticipants, setSelectedParticipants] = useState([]); // Дополнительные участники
   const [loadingParticipants, setLoadingParticipants] = useState(false);
   const [participantsError, setParticipantsError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -50,7 +49,6 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
           const data = await response.json();
           const filteredParticipants = data.map(p => ({
             ...p,
-            selected: false,
             name: `${p.first_name || ''} ${p.last_name || ''} (${p.username})`.trim()
           }));
           setParticipants(filteredParticipants);
@@ -71,13 +69,23 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
     setTaskData(prev => ({ ...prev, [name]: value }));
   };
 
-  const toggleParticipant = (id) => {
-    setSelectedParticipants(prev =>
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    );
-    setParticipants(participants.map(p =>
-      p.id === id ? { ...p, selected: !p.selected } : p
-    ));
+  const handleParticipantSelect = (e) => {
+    const selectedId = e.target.value;
+    if (!selectedId) return;
+
+    if (!taskData.assigned_to) {
+      // Если основного участника нет, устанавливаем его
+      setTaskData(prev => ({ ...prev, assigned_to: selectedId }));
+    } else if (!selectedParticipants.includes(selectedId) && selectedId !== taskData.assigned_to) {
+      // Добавляем как дополнительного участника
+      setSelectedParticipants(prev => [...prev, selectedId]);
+    }
+    // Сброс селекта после выбора
+    e.target.value = '';
+  };
+
+  const removeParticipant = (id) => {
+    setSelectedParticipants(prev => prev.filter(p => p !== id));
   };
 
   const handleSubmit = async (e) => {
@@ -90,7 +98,6 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
       description: taskData.description,
       assigned_to: taskData.assigned_to || null,
       project: projectId,
-      due_date: taskData.due_date || null
     };
 
     if (!dataToSubmit.description) {
@@ -100,6 +107,11 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
     }
     if (!dataToSubmit.project) {
       setError('Помилка: Задача повинна бути прив\'язана до проекту.');
+      setLoading(false);
+      return;
+    }
+    if (!dataToSubmit.assigned_to) {
+      setError('Необхідно призначити основного учасника.');
       setLoading(false);
       return;
     }
@@ -125,7 +137,6 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
                 description: 'Опис',
                 project: 'Проект',
                 assigned_to: 'Призначено на',
-                due_date: 'Дедлайн',
                 detail: 'Помилка'
               }[key] || key;
               return `${fieldName}: ${Array.isArray(value) ? value.join(', ') : value}`;
@@ -139,7 +150,7 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
 
       const newTask = await response.json();
 
-      // Добавляем выбранных участников в проект
+      // Отправка дополнительных участников
       for (const userId of selectedParticipants) {
         await fetch(`http://localhost:8000/api/projects/${projectId}/members/add/`, {
           method: 'POST',
@@ -152,14 +163,13 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
         });
       }
 
-      console.log('Задача успішно створена:', newTask);
       setSuccess(true);
 
       if (onTaskSubmit) {
         onTaskSubmit(newTask);
       }
 
-      setTaskData({ description: '', assigned_to: '', due_date: '' });
+      setTaskData({ description: '', assigned_to: '' });
       setSelectedParticipants([]);
       setTimeout(() => {
         onHide();
@@ -173,7 +183,7 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
   };
 
   const handleClose = () => {
-    setTaskData({ description: '', assigned_to: '', due_date: '' });
+    setTaskData({ description: '', assigned_to: '' });
     setError(null);
     setSuccess(false);
     setLoading(false);
@@ -208,11 +218,11 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="addTaskAssignee">
-            <Form.Label>Призначити на</Form.Label>
+            <Form.Label>Учасники</Form.Label>
             <Form.Select
               name="assigned_to"
-              value={taskData.assigned_to}
-              onChange={handleInputChange}
+              value=""
+              onChange={handleParticipantSelect}
               disabled={loading || loadingParticipants}
             >
               <option value="">Оберіть учасника</option>
@@ -224,29 +234,27 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
                 ))
               )}
             </Form.Select>
-          </Form.Group>
-
-          <Form.Group className="mb-3" controlId="addTaskParticipants">
-            <Form.Label>Додаткові учасники</Form.Label>
-            {loadingParticipants ? (
-              <div className="text-center">
-                <Spinner animation="border" role="status" className="me-2" />
-                Завантаження учасників...
+            
+            {selectedParticipants.length > 0 && (
+              <div className="mt-2">
+                <Form.Label>Додаткові учасники:</Form.Label>
+                {selectedParticipants.map(id => {
+                  const participant = participants.find(p => p.id === id);
+                  return participant ? (
+                    <div key={id} className="d-flex align-items-center mb-1">
+                      <span className="me-2">{participant.name}</span>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => removeParticipant(id)}
+                        disabled={loading}
+                      >
+                        Видалити
+                      </Button>
+                    </div>
+                  ) : null;
+                })}
               </div>
-            ) : participants.length > 0 ? (
-              participants.map(participant => (
-                <Form.Check
-                  key={participant.id}
-                  type="checkbox"
-                  id={`participant-${participant.id}`}
-                  label={participant.name}
-                  checked={participant.selected}
-                  onChange={() => toggleParticipant(participant.id)}
-                  className="mb-2"
-                />
-              ))
-            ) : (
-              <p className="text-muted">Немає доступних учасників для додавання.</p>
             )}
           </Form.Group>
         </Modal.Body>

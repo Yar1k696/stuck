@@ -47,6 +47,12 @@
 .project-column .dropdown-toggle::after {
   display: none;
 }
+.mn-btn {
+  border: 0;
+}
+.mn-btn .card-body {
+  padding: 0;
+}
 @media (width < 996px) {
   .team {
     padding: 15px 0;

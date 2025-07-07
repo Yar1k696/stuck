@@ -41,13 +41,10 @@ const LoginPage = () => {
    }
 
    const data = await response.json();
-   console.log('Успішний вхід:', data);
-
 
    navigate('/tasks');
 
   } catch (e) {
-   console.error('Помилка входу:', e);
    setError(e.message || 'Не вдалося увійти. Перевірте дані.');
   } finally {
    setLoading(false);

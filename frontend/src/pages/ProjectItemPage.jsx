@@ -3,18 +3,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Spinner, Alert, Card, Button, Row, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashAlt, faUser, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
-import AddTaskModal from '../components/AddTaskModal';
 import TasksBoard from '../components/TasksBoard';
 import ParticipantsBoard from '../components/ParticipantsBoard';
+import { useTaskContext } from '../TaskContext';
 
 const ProjectItemPage = () => {
-    const [showModal, setShowModal] = useState(false);
     const { pk } = useParams();
     const navigate = useNavigate();
     const [project, setProject] = useState(null);
-    const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { refreshTasks } = useTaskContext(); // Используем refreshTasks из контекста
 
     const projectId = parseInt(pk, 10);
 
@@ -63,7 +62,6 @@ const ProjectItemPage = () => {
                 setError(null);
             }
         } catch (e) {
-            console.error(`Failed to fetch project ${pk}:`, e);
             setError(e.message || `Не вдалося завантажити дані проекту.`);
             setProject(null);
         } finally {
@@ -71,37 +69,14 @@ const ProjectItemPage = () => {
         }
     };
 
-    const fetchTasks = async () => {
-        try {
-            const response = await fetch(`http://localhost:8000/api/tasks/by-project/${pk}/`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            const normalizedTasks = data.map(task => ({
-                ...task,
-                status: task.status.toLowerCase()
-            }));
-            setTasks(normalizedTasks);
-        } catch (e) {
-            console.error(`Failed to fetch tasks for project ${pk}:`, e);
-            setError(e.message || 'Не вдалося завантажити завдання.');
-        }
-    };
-
     useEffect(() => {
         fetchProject();
-        fetchTasks();
     }, [pk]);
 
     const handleDeleteProject = async () => {
         if (window.confirm(`Ви впевнені, що хочете видалити проект "${project?.title || 'без назви'}"?`)) {
             try {
-                const response = await fetch(`/api/projects/del/${pk}/`, {
+                const response = await fetch(`http://localhost:8000/api/projects/del/${pk}/`, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -116,21 +91,11 @@ const ProjectItemPage = () => {
                 }
 
                 alert('Проект успішно видалено.');
-                navigate('/projects');
+                navigate('/tasks');
             } catch (e) {
-                console.error(`Failed to delete project ${pk}:`, e);
                 setError(e.message || 'Не вдалося видалити проект.');
             }
         }
-    };
-
-    const handleTaskAdded = (newTask) => {
-        const normalizedTask = {
-            ...newTask,
-            status: newTask.status.toLowerCase()
-        };
-        setTasks(prevTasks => [...prevTasks, normalizedTask]);
-        setShowModal(false);
     };
 
     if (loading) {
@@ -147,7 +112,7 @@ const ProjectItemPage = () => {
         return (
             <Container className="mt-5">
                 <Alert variant="danger">{error} <Button variant="link" onClick={fetchProject}>Спробувати ще</Button></Alert>
-                <Button variant="secondary" className="mt-3" onClick={() => navigate('/projects')}>
+                <Button variant="secondary" className="mt-3" onClick={() => navigate('/tasks')}>
                     Повернутись до списку проектів
                 </Button>
             </Container>
@@ -158,7 +123,7 @@ const ProjectItemPage = () => {
         return (
             <Container className="mt-5">
                 <Alert variant="info">Проект не знайдено або сталася помилка при завантаженні.</Alert>
-                <Button variant="secondary" className="mt-3" onClick={() => navigate('/projects')}>
+                <Button variant="secondary" className="mt-3" onClick={() => navigate('/tasks')}>
                     Повернутись до списку проектів
                 </Button>
             </Container>
@@ -173,7 +138,7 @@ const ProjectItemPage = () => {
                     <Card>
                         <Card.Body>
                             <Row>
-                                <Col md={6}>
+                                <Col md={4}>
                                     <Card.Title>Опис проекту:</Card.Title>
                                     <Card.Text>{project.description || 'Без опису'}</Card.Text>
                                     {project.created_by && (
@@ -181,8 +146,6 @@ const ProjectItemPage = () => {
                                             <Card.Title className="d-inline-block me-2">Створив:</Card.Title>
                                             <FontAwesomeIcon icon={faUser} className="me-1" />
                                             <span>{project.created_by.username || 'Невідомий користувач'}</span>
-                                            {/* Отладка: выводим created_by в консоль при рендере */}
-                                            {console.log('Rendering created_by:', project)}
                                         </div>
                                     )}
                                     {project.created_at && (
@@ -198,7 +161,7 @@ const ProjectItemPage = () => {
                                         </div>
                                     )}
                                 </Col>
-                                <Col md={6}>
+                                <Col md={8}>
                                     <Card.Title>Учасники:</Card.Title>
                                     <ParticipantsBoard projectId={projectId} />
                                 </Col>
@@ -207,9 +170,8 @@ const ProjectItemPage = () => {
                     </Card>
                 </Col>
                 <Col md={2}>
-                    <Card>
+                    <Card className='mn-btn'>
                         <Card.Body>
-                            <Card.Title>Дії:</Card.Title>
                             <Button variant="primary" className="w-100 mb-2" onClick={() => navigate(`/projects/edit/${pk}`)}>
                                 <FontAwesomeIcon icon={faEdit} className="me-2" /> Редагувати
                             </Button>
@@ -223,15 +185,8 @@ const ProjectItemPage = () => {
             
             <div className="mt-5">
                 <h4 className="text-center">Завдання проекту</h4>
-                <TasksBoard projectId={projectId} tasks={tasks} />
+                <TasksBoard projectId={projectId} refreshTasks={refreshTasks} />
             </div>
-
-            <AddTaskModal
-                show={showModal}
-                onHide={() => setShowModal(false)}
-                projectId={pk}
-                onTaskSubmit={handleTaskAdded}
-            />
         </Container>
     );
 };

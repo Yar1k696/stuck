@@ -123,9 +123,6 @@ const TaskItemPage = () => {
       // NOTE: If you are editing directly on THIS page, you would show/hide a form here
   };
 
-
-  // --- Render Logic ---
-
   // Show spinner while loading task data
   if (loading) {
     return (
