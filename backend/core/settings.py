@@ -22,7 +22,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 # Allowed hosts for the application
 # This can be set in the .env file or defaults to localhost for local testing.
 # It should be a comma-separated list of hosts.
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,stuck.onrender.com', cast=lambda v: [s.strip() for s in v.split(',')])
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
@@ -30,6 +30,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:8000",
+    "https://stuck.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -37,6 +38,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://stuck.onrender.com",
 ]
 
 # Allowed hosts for local testing
@@ -46,7 +48,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 1209600  # 14 days
 SESSION_SAVE_EVERY_REQUEST = True
