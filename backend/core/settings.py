@@ -43,7 +43,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Allowed hosts for local testing
 # This is a fallback for local development; in production, use environment variables.
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
