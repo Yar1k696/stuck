@@ -46,7 +46,7 @@ const AddProjectModal = ({ show, onHide, onProjectSubmit }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/projects/add/', {
+      const response = await fetch('/api/projects/add/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

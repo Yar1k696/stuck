@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import loginImage from '../assets/bg.webp'; // Переконайтеся, що шлях правильний
+import loginImage from '../static/assets/bg.webp'; // Переконайтеся, що шлях правильний
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -17,9 +17,9 @@ const ForgotPassword = () => {
     setLoading(true); // Встановлюємо стан завантаження
 
     try {
-      // Замініть 'http://localhost:8000/api/password-reset/' на реальний URL вашого API для скидання пароля
+      // Замініть '/api/password-reset/' на реальний URL вашого API для скидання пароля
       // API для скидання пароля зазвичай приймає email та надсилає лист
-      const response = await fetch('http://localhost:8000/api/password-reset/', {
+      const response = await fetch('/api/password-reset/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

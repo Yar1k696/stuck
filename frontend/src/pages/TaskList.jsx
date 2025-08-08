@@ -24,7 +24,7 @@ const TaskList = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch('http://localhost:8000/api/user/me/', {
+        const response = await fetch('/api/user/me/', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken || '' },
           credentials: 'include',

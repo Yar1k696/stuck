@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 @api_view(['GET'])
 @csrf_exempt
 @ensure_csrf_cookie
+@permission_classes([AllowAny])
 def current_user(request: object) -> Response:
     """
     Retrieve the current authenticated user's data and CSRF token.

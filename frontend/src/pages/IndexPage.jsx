@@ -3,7 +3,7 @@ import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-b
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
-import loginImage from '../assets/bg.webp';
+import loginImage from '../static/assets/bg.webp';
 import AddProjectModal from '../components/AddProjectModal';
 import { useTaskContext } from '../TaskContext';
 
@@ -31,7 +31,7 @@ const IndexPage = ({ onLoginSuccess }) => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/user/me/', {
+      const response = await fetch('/api/user/me/', {
         credentials: 'include',
       });
       if (response.ok) {
@@ -50,7 +50,7 @@ const IndexPage = ({ onLoginSuccess }) => {
     setProjectsLoading(true);
     setProjectsError(null);
     try {
-      const response = await fetch(`http://localhost:8000/api/projects/?user=${currentUser.id}`, {
+      const response = await fetch(`/api/projects/?user=${currentUser.id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ const IndexPage = ({ onLoginSuccess }) => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/login/', {
+      const response = await fetch('/api/auth/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

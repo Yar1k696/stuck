@@ -30,7 +30,7 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
         setParticipantsError(null);
 
         try {
-          const response = await fetch('http://127.0.0.1:8000/api/users/', {
+          const response = await fetch('/api/users/', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/tasks/add/', {
+      const response = await fetch('/api/tasks/add/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
 
       // Отправка дополнительных участников
       for (const userId of selectedParticipants) {
-        await fetch(`http://localhost:8000/api/projects/${projectId}/members/add/`, {
+        await fetch(`/api/projects/${projectId}/members/add/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

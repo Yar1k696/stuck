@@ -200,9 +200,9 @@ const TasksBoard = ({ projectId, userId, refreshTasks }) => {
     try {
       let url;
       if (projectId) {
-        url = `http://localhost:8000/api/tasks/by-project/${projectId}/`;
+        url = `/api/tasks/by-project/${projectId}/`;
       } else {
-        url = 'http://localhost:8000/api/tasks/';
+        url = '/api/tasks/';
         if (userId) {
           url += `?user=${userId}`;
         }
@@ -240,7 +240,7 @@ const TasksBoard = ({ projectId, userId, refreshTasks }) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/users/', {
+      const response = await fetch('/api/users/', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
         credentials: 'include',
@@ -259,7 +259,7 @@ const TasksBoard = ({ projectId, userId, refreshTasks }) => {
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/tasks/edit/${taskId}/`, {
+      const response = await fetch(`/api/tasks/edit/${taskId}/`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -282,7 +282,7 @@ const TasksBoard = ({ projectId, userId, refreshTasks }) => {
 
   const handleDeleteTask = async (taskId) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/tasks/del/${taskId}/`, {
+      const response = await fetch(`/api/tasks/del/${taskId}/`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
         credentials: 'include',

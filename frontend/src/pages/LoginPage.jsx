@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import loginImage from '../assets/bg.webp';
+import loginImage from '../static/assets/bg.webp';
 
 function getCookie(name) {
  const cookieValue = document.cookie
@@ -25,7 +25,7 @@ const LoginPage = () => {
   setLoading(true);
 
   try {
-   const response = await fetch('http://localhost:8000/api/auth/login/', {
+   const response = await fetch('/api/auth/login/', {
     method: 'POST',
     headers: {
      'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const LoginPage = () => {
          </Button>
         </Form>
         <div className="text-center mt-2">
-         Ще не маєте акаунту? <Link to="/register">Зареєструватися</Link>
+         Ще не маєте акаунт? <Link to="/register">Зареєструватися</Link>
         </div>
        </Card.Body>
       </Card>

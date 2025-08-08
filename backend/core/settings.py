@@ -36,7 +36,9 @@ CORS_ALLOW_CREDENTIALS = True
 # CSRF settings
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:8000",
     "http://127.0.0.1:5173",
+    "https://stuck.onrender.com",
 ]
 
 # Allowed hosts for local testing
@@ -45,9 +47,12 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = None
 SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = None  
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=True, cast=bool)
+
 SESSION_COOKIE_AGE = 1209600  # 14 days
 SESSION_SAVE_EVERY_REQUEST = True
 
@@ -150,10 +155,16 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 STATIC_URL = 'static/'
 if DEBUG:
-    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'public')]
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'public'),
+        os.path.join(BASE_DIR, 'frontend', 'dist'),
+        ]
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [BASE_DIR / 'public']
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'public'),
+        os.path.join(BASE_DIR, 'frontend', 'dist'),
+    ]
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

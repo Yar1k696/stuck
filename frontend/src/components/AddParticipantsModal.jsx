@@ -26,7 +26,7 @@ const AddParticipantsModal = ({ show, onHide, onParticipantsSubmit, projectId })
 
         try {
           // Получаем всех пользователей
-          const usersResponse = await fetch('http://localhost:8000/api/users/', {
+          const usersResponse = await fetch('/api/users/', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ const AddParticipantsModal = ({ show, onHide, onParticipantsSubmit, projectId })
 
           const usersData = await usersResponse.json();
 
-          const membersResponse = await fetch(`http://localhost:8000/api/projects/${projectId}/members/`, {
+          const membersResponse = await fetch(`/api/projects/${projectId}/members/`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ const AddParticipantsModal = ({ show, onHide, onParticipantsSubmit, projectId })
     try {
       const addedParticipants = [];
       for (const participant of selected) {
-        const response = await fetch(`http://localhost:8000/api/projects/${projectId}/members/add/`, {
+        const response = await fetch(`/api/projects/${projectId}/members/add/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -26,7 +26,7 @@ const ProjectsBoard = ({ userId }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:8000/api/projects/?user=${userId}`, {
+      const response = await fetch(`/api/projects/?user=${userId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

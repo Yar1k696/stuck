@@ -67,7 +67,7 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
       formData.append('avatar', selectedFile);
 
       try {
-        const response = await fetch('http://localhost:8000/api/user/avatar/', {
+        const response = await fetch('/api/user/avatar/', {
           method: 'POST',
           body: formData,
           credentials: 'include',
@@ -89,7 +89,7 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/logout/', {
+      const response = await fetch('/api/auth/logout/', {
         method: 'POST',
         credentials: 'include',
         headers: {

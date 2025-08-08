@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom'; // Додаємо useNavigate
-import loginImage from '../assets/bg.webp'; // Переконайтеся, що шлях правильний
+import loginImage from '../static/assets/bg.webp'; // Переконайтеся, що шлях правильний
 
 const RegisterPage = () => {
   const [username, setUsername] = useState(''); // Додаємо стан для username
@@ -24,7 +24,7 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/register/', {
+      const response = await fetch('/api/auth/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

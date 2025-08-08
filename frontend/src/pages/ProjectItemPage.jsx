@@ -40,7 +40,7 @@ const ProjectItemPage = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`http://localhost:8000/api/projects/${pk}/`, {
+            const response = await fetch(`/api/projects/${pk}/`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -76,7 +76,7 @@ const ProjectItemPage = () => {
     const handleDeleteProject = async () => {
         if (window.confirm(`Ви впевнені, що хочете видалити проект "${project?.title || 'без назви'}"?`)) {
             try {
-                const response = await fetch(`http://localhost:8000/api/projects/del/${pk}/`, {
+                const response = await fetch(`/api/projects/del/${pk}/`, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',

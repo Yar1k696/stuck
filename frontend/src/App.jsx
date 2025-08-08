@@ -27,7 +27,7 @@ function App() {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/user/me/', {
+      const response = await fetch('/api/user/me/', {
         credentials: 'include'
       });
       

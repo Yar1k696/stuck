@@ -26,7 +26,7 @@ const ProjectEdit = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:8000/api/projects/${pk}/`, {
+        const response = await fetch(`/api/projects/${pk}/`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -68,7 +68,7 @@ const ProjectEdit = () => {
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:8000/api/projects/edit/${pk}/`, {
+      const response = await fetch(`/api/projects/edit/${pk}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
