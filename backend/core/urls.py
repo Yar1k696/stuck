@@ -27,7 +27,7 @@ urlpatterns = [
     path('api/user/me/', current_user, name='current_user'),
     path('api/users/', user_list, name='users'),
     re_path(r'^(?!api/|media/|assets/|static/).*$', TemplateView.as_view(template_name='index.html'), name='react_app'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

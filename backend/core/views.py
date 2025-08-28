@@ -17,7 +17,6 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from .forms import UserAvatarForm
 from .serializers import UserSerializer, UserListSerializer
-import logging
 
 User = get_user_model()
 
@@ -40,8 +39,6 @@ def upload_avatar(request: object) -> JsonResponse:
         return JsonResponse({'success': True, 'avatar_url': user.avatar.url})
     return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
-logger = logging.getLogger(__name__)
-
 @api_view(['GET'])
 @csrf_exempt
 @ensure_csrf_cookie
@@ -56,9 +53,7 @@ def current_user(request: object) -> Response:
     Returns:
         Response: JSON response with user data and CSRF token.
     """
-    logger.info(f"Request received: {request.method}, User authenticated: {request.user.is_authenticated}")
     csrf_token = get_token(request)
-    logger.info(f"CSRF token generated: {csrf_token}")
     if request.user.is_authenticated:
         serializer = UserSerializer(request.user, context={'request': request})
         return Response({'user': serializer.data, 'csrf_token': csrf_token})

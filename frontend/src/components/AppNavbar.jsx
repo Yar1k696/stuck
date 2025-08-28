@@ -18,10 +18,18 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
   const [showParticipantModal, setShowParticipantModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
-  const { setRefreshTasks, setRefreshParticipants, setRefreshProjects } = useTaskContext();
+  const { setRefreshTasks, setRefreshParticipants, setRefreshProjects, setRefreshAvatar } = useTaskContext();
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  const getAvatarUrl = (avatarPath) => {
+    if (!avatarPath) return null;
+    if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+      return avatarPath.replace('http://', 'https://');
+    }
+    return `${window.location.origin}${avatarPath}`;
+  };
 
   const handleTaskSubmit = () => {
     setRefreshTasks(prev => !prev);
@@ -34,10 +42,8 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
     setShowParticipantModal(false);
   };
 
-  const handleProjectSubmit = (newProject) => {
-    setRefreshProjects(prev => {
-      return !prev;
-    });
+  const handleProjectSubmit = () => {
+    setRefreshProjects(prev => !prev);
     setShowProjectModal(false);
   };
 
@@ -46,19 +52,16 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
     if (file) {
       setSelectedFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
+      reader.onloadend = () => setPreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
 
   function getCSRFToken() {
-    const cookieValue = document.cookie
+    return document.cookie
       .split('; ')
       .find(row => row.startsWith('csrftoken='))
       ?.split('=')[1];
-    return cookieValue;
   }
 
   const handleUpload = async () => {
@@ -76,15 +79,22 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
           },
         });
 
-        if (!response.ok) {
-          console.error('Ошибка загрузки аватарки:', await response.text());
+        if (response.ok) {
+          const updatedUser = await response.json();
+          if (onLogout) {
+            onLogout(updatedUser);
+          }
+          setRefreshAvatar(prev => !prev);
+          setSelectedFile(null);
+          setPreview(null);
+        } else {
+          console.error('Помилка завантаження аватарки:', await response.text());
         }
       } catch (error) {
-        console.error('Ошибка загрузки аватарки:', error);
+        console.error('Помилка завантаження аватарки:', error);
       }
     }
     setShowAvatarModal(false);
-    setPreview(null);
   };
 
   const handleLogout = async () => {
@@ -101,10 +111,10 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
         onLogout();
         navigate('/login');
       } else {
-        console.error('Ошибка выхода:', await response.text());
+        console.error('Помилка виходу:', await response.text());
       }
     } catch (error) {
-      console.error('Ошибка при выходе:', error);
+      console.error('Помилка при виході:', error);
     }
   };
 
@@ -112,14 +122,13 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
   const isProjectDetailPage = location.pathname.startsWith('/project/') || 
                             location.pathname.startsWith('/projects/');
   const isTaskDetailPage = location.pathname.startsWith('/tasks/');
-
   const projectId = isProjectDetailPage ? parseInt(location.pathname.split('/')[2]) : null;
 
   const renderParticipant = (user, index) => (
     <OverlayTrigger
       key={user.id || index}
       placement="bottom"
-      overlay={<Tooltip>{user.username || `Участник ${index + 1}`}</Tooltip>}
+      overlay={<Tooltip>{user.username || `Учасник ${index + 1}`}</Tooltip>}
     >
       <div 
         className="participant-avatar"
@@ -127,7 +136,7 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
           width: '32px', 
           height: '32px', 
           borderRadius: '50%',
-          backgroundImage: user.avatar ? `url(${user.avatar})` : `url(https://via.placeholder.com/32)`,
+          backgroundImage: user.avatar ? `url(${getAvatarUrl(user.avatar)})` : `ur[](https://via.placeholder.com/32)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundColor: '#6c757d',
@@ -193,7 +202,7 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
 
           <Navbar.Collapse id="basic-navbar-nav">
             <Stack direction="horizontal" gap={3} className="ms-auto align-items-center">
-              {project && project.members && project.members.length > 0 && (
+              {project?.members?.length > 0 && (
                 <div className="d-flex align-items-center">
                   <FontAwesomeIcon 
                     icon={faUsers} 
@@ -227,7 +236,9 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
                   width: '40px',
                   height: '40px',
                   borderRadius: '50%',
-                  backgroundImage: currentUser?.avatar ? `url(${currentUser.avatar})` : undefined,
+                  backgroundImage: currentUser?.avatar 
+                                    ? `url(${getAvatarUrl(currentUser.avatar)})`
+                                    : undefined,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundColor: '#6c757d',
@@ -238,7 +249,9 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
                   border: '2px solid #fff',
                 }}
               >
-                {!currentUser?.avatar && currentUser?.username?.[0]?.toUpperCase()}
+                {(!currentUser?.avatar) && (
+                  <span>{currentUser?.username?.[0]?.toUpperCase() || "?"}</span>
+                )}
               </div>
 
               <Button 
@@ -313,7 +326,7 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
             onClick={() => setShowAvatarModal(false)}
             style={{ minWidth: '120px' }}
           >
-            Отмена
+            Скасувати
           </Button>
           <Button 
             variant="primary" 
@@ -321,7 +334,7 @@ const AppNavbar = ({ currentUser, project, onLogout }) => {
             disabled={!selectedFile}
             style={{ minWidth: '120px' }}
           >
-            Сохранить
+            Зберегти
           </Button>
         </Modal.Footer>
       </Modal>

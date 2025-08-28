@@ -91,24 +91,24 @@ const ProjectsBoard = ({ userId }) => {
       <Row xs={1} md={2} lg={3} className="g-4">
         {projects.map(project => (
           <Col key={project.id}>
-            <Card className="h-100">
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-start mb-3">
-                  <Card.Title>
-                    <Link to={`/project/${project.id}`}>{project.title}</Link>
-                  </Card.Title>
-                </div>
-                <Card.Text className="text-muted mb-3">
-                  {project.description || 'Без опису'}
-                </Card.Text>
-                <div className="text-muted small">
-                  <div>
-                    <FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
-                    {formatDate(project.created_at)}
+            <Link to={`/project/${project.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Card className="h-100">
+                <Card.Body>
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <Card.Title>{project.title}</Card.Title>
                   </div>
-                </div>
-              </Card.Body>
-            </Card>
+                  <Card.Text className="text-muted mb-3">
+                    {project.description || 'Без опису'}
+                  </Card.Text>
+                  <div className="text-muted small">
+                    <div>
+                      <FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
+                      {formatDate(project.created_at)}
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Link>
           </Col>
         ))}
         {projects.length === 0 && (

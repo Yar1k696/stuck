@@ -31,7 +31,7 @@ const IndexPage = ({ onLoginSuccess }) => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await fetch('/api/user/me/', {
+      const response = await fetch('http://localhost:8000/api/user/me/', {
         credentials: 'include',
       });
       if (response.ok) {
@@ -50,7 +50,7 @@ const IndexPage = ({ onLoginSuccess }) => {
     setProjectsLoading(true);
     setProjectsError(null);
     try {
-      const response = await fetch(`/api/projects/?user=${currentUser.id}`, {
+      const response = await fetch(`http://localhost:8000/api/projects/?user=${currentUser.id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -81,13 +81,19 @@ const IndexPage = ({ onLoginSuccess }) => {
     }
   }, [currentUser, refreshProjects]);
 
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/tasks');
+    }
+  }, [currentUser, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login/', {
+      const response = await fetch('http://localhost:8000/api/auth/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

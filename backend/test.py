@@ -1,8 +1,12 @@
+import os
+import datetime
+import django
 from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.utils import timezone
-import os
-import datetime
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+django.setup()
 
 # Получение модели пользователя
 User = get_user_model()

@@ -1,31 +1,28 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import loginImage from '../static/assets/bg.webp'; // Переконайтеся, що шлях правильний
+import loginImage from '../static/assets/bg.webp';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState(''); // Для повідомлень про успіх
-  const [error, setError] = useState('');     // Для повідомлень про помилку
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setMessage(''); // Очищаємо попередні повідомлення
-    setError('');   // Очищаємо попередні помилки
-    setLoading(true); // Встановлюємо стан завантаження
+    setMessage('');
+    setError('');
+    setLoading(true); 
 
     try {
-      // Замініть '/api/password-reset/' на реальний URL вашого API для скидання пароля
-      // API для скидання пароля зазвичай приймає email та надсилає лист
       const response = await fetch('/api/password-reset/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-           // 'X-CSRFToken': 'ваш_csrf_токен',
         },
-        body: JSON.stringify({ email }), // Відправляємо email
+        body: JSON.stringify({ email }),
       });
 
        if (!response.ok) {
@@ -35,33 +32,30 @@ const ForgotPassword = () => {
          throw new Error(errorMessage);
        }
 
-       // Якщо відповідь OK (наприклад, 200 OK або 204 No Content, залежно від API)
-       // Не завжди повертає тіло, але може бути повідомлення
-       const data = await response.json().catch(() => null); // Спробуємо прочитати, але не кидаємо помилку, якщо тіла немає
+       const data = await response.json().catch(() => null);
 
-
-      setMessage('Перевірте вашу пошту для подальших інструкцій.'); // Повідомлення про успіх
-      setEmail(''); // Очищаємо поле email
+      setMessage('Перевірте вашу пошту для подальших інструкцій.');
+      setEmail('');
 
     } catch (e) {
       console.error('Помилка скидання пароля:', e);
-      setError(e.message || 'Не вдалося скинути пароль'); // Встановлюємо повідомлення про помилку
+      setError(e.message || 'Не вдалося скинути пароль');
     } finally {
-      setLoading(false); // Вимикаємо стан завантаження
+      setLoading(false);
     }
   };
 
   return (
     <Container fluid className="vh-100 p-0">
       <Row className="g-0 h-100">
-        {/* Ліва частина з фоновим зображенням */}
+        
         <Col
           md={6}
           className="d-none d-md-flex align-items-center justify-content-center"
           style={{
             background: `url(${loginImage}) no-repeat center center`,
             backgroundSize: 'cover',
-            // minHeight: '300px' // Приклад
+
           }}
         >
           <div className="text-white text-center p-4">
@@ -70,18 +64,16 @@ const ForgotPassword = () => {
           </div>
         </Col>
 
-        {/* Права частина з формою скидання пароля */}
         <Col
           md={6}
-          className="d-flex align-items-center justify-content-center p-4 bg-light" // bg-light був у вашому коді
+          className="d-flex align-items-center justify-content-center p-4 bg-light" 
         >
           <div style={{ maxWidth: '400px', width: '100%' }}>
             <Card className="shadow-sm border-0">
               <Card.Body>
                 <h2 className="text-center mb-4">Скидання пароля</h2>
-                {/* Виведення повідомлень */}
                 {error && <Alert variant="danger">{error}</Alert>}
-                {message && <Alert variant="success">{message}</Alert>} {/* Виведення повідомлення про успіх */}
+                {message && <Alert variant="success">{message}</Alert>}
 
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-3" controlId="forgotPasswordEmail">
@@ -91,11 +83,11 @@ const ForgotPassword = () => {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      disabled={loading} // Блокуємо поля під час завантаження
+                      disabled={loading}
                     />
                   </Form.Group>
                   <Button
-                    disabled={loading} // Блокуємо кнопку під час завантаження
+                    disabled={loading}
                     className="w-100 mb-3"
                     type="submit"
                     variant="primary"

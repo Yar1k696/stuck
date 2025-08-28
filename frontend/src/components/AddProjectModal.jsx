@@ -55,7 +55,6 @@ const AddProjectModal = ({ show, onHide, onProjectSubmit }) => {
         credentials: 'include',
         body: JSON.stringify(formData),
       });
-      console.log('Request sent with body:', JSON.stringify(formData));
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ detail: response.statusText }));
@@ -78,11 +77,10 @@ const AddProjectModal = ({ show, onHide, onProjectSubmit }) => {
       }
 
       const newProject = await response.json();
-      console.log('Project added successfully:', newProject);
       setSuccess(true);
 
       if (onProjectSubmit) {
-        onProjectSubmit(newProject); // Передаем новый проект родителю
+        onProjectSubmit(newProject);
       }
 
       setFormData({ title: '', description: '' });
@@ -142,7 +140,7 @@ const AddProjectModal = ({ show, onHide, onProjectSubmit }) => {
             variant="primary"
             type="submit"
             disabled={loading}
-            onClick={() => console.log('Submit button clicked')}
+            // onClick={() => console.log('Submit button clicked')}
           >
             {loading ? (
               <Spinner

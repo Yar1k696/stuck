@@ -25,7 +25,6 @@ const AddParticipantsModal = ({ show, onHide, onParticipantsSubmit, projectId })
         setParticipantsError(null);
 
         try {
-          // Получаем всех пользователей
           const usersResponse = await fetch('/api/users/', {
             method: 'GET',
             headers: {
@@ -61,9 +60,8 @@ const AddParticipantsModal = ({ show, onHide, onParticipantsSubmit, projectId })
           const memberUserIds = membersData.map(member => member.user.id);
           const ownerUserIds = membersData
             .filter(member => member.role === 'OWNER')
-            .map(member => member.user.id); // ID владельцев
+            .map(member => member.user.id);
 
-          // Фильтруем пользователей, исключая владельцев и уже добавленных участников
           const filteredParticipants = usersData
             .filter(user => !memberUserIds.includes(user.id) && !ownerUserIds.includes(user.id))
             .map(p => ({
@@ -147,7 +145,7 @@ const AddParticipantsModal = ({ show, onHide, onParticipantsSubmit, projectId })
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Додати учасників до проекту</Modal.Title>
+        <Modal.Title>Додати додаткових учасників</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {participantsError && <Alert variant="warning">{participantsError}</Alert>}

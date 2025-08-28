@@ -111,67 +111,79 @@ const ParticipantsBoard = ({ projectId }) => {
   return (
     <>
       <Row className="g-3">
-        {participants.map((participant, index) => {
-          const user = participant.user || {};
-          let avatarUrl = user.avatar_url || 'https://via.placeholder.com/50';
-          if (avatarUrl.startsWith('http://')) {
-            avatarUrl = avatarUrl.replace('http://', 'https://');
-          }
+        {participants.length > 0 ? (
+          participants.map((participant, index) => {
+            const user = participant.user || {};
+            let avatarUrl = user.avatar_url || 'https://via.placeholder.com/50';
+            if (avatarUrl.startsWith('http://')) {
+              avatarUrl = avatarUrl.replace('http://', 'https://');
+            }
 
-          return (
-            <Col key={participant.id || user.id || index} xs={12} sm={6} md={4} lg={3}>
-              <Card className="h-100 shadow-sm" style={{ minHeight: '150px', position: 'relative' }}>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleRemoveParticipant(participant.id)}
-                  style={{
-                    position: 'absolute',
-                    top: '-7px',
-                    right: '-7px',
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 0,
-                    zIndex: 1,
-                  }}
-                >
-                  <FontAwesomeIcon icon={faTimes} />
-                </Button>
-                <Card.Body className="d-flex flex-column align-items-center text-center">
-                  <div
+            return (
+              <Col key={participant.id || user.id || index} xs={12} sm={6} md={4} lg={3}>
+                <Card className="h-100 shadow-sm" style={{ minHeight: '150px', position: 'relative' }}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleRemoveParticipant(participant.id)}
                     style={{
-                      width: '50px',
-                      height: '50px',
+                      position: 'absolute',
+                      top: '-7px',
+                      right: '-7px',
+                      width: '20px',
+                      height: '20px',
                       borderRadius: '50%',
-                      backgroundImage: `url(${avatarUrl})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      backgroundColor: '#6c757d',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'white',
-                      fontSize: '1.2rem',
-                      border: '2px solid #fff',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                      marginBottom: '10px',
+                      padding: 0,
+                      zIndex: 1,
                     }}
                   >
-                    {!user.avatar_url &&
-                      (user.username?.[0]?.toUpperCase() || `У${index + 1}`)}
-                  </div>
-                  <Card.Title style={{ fontSize: '0.8rem', marginBottom: '5px' }}>
-                    {user.first_name || user.username || ''} {user.last_name || ''}
-                  </Card.Title>
-                </Card.Body>
-              </Card>
-            </Col>
-          );
-        })}
+                    <FontAwesomeIcon icon={faTimes} />
+                  </Button>
+                  <Card.Body className="d-flex flex-column align-items-center text-center">
+                    <div
+                      style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '50%',
+                        backgroundImage: `url(${avatarUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundColor: '#6c757d',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '1.2rem',
+                        border: '2px solid #fff',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        marginBottom: '10px',
+                      }}
+                    >
+                      {!user.avatar_url &&
+                        (user.username?.[0]?.toUpperCase() || `У${index + 1}`)}
+                    </div>
+                    <Card.Title style={{ fontSize: '0.8rem', marginBottom: '5px' }}>
+                      {user.first_name || user.username || ''} {user.last_name || ''}
+                    </Card.Title>
+                  </Card.Body>
+                </Card>
+              </Col>
+            );
+          })
+        ) : (
+          <Col>
+            <Card>
+              <Card.Body className="text-center">
+                <Card.Text className="text-muted">
+                  Немає доданих учасників.
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+        )}
       </Row>
 
       <AddParticipantsModal

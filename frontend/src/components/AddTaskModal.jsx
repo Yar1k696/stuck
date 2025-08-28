@@ -23,6 +23,13 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
   const [success, setSuccess] = useState(false);
   const csrfToken = getCookie('csrftoken');
 
+  // Сброс состояния success при открытии модального окна
+  useEffect(() => {
+    if (show) {
+      setSuccess(false); // Сбрасываем успех при каждом открытии
+    }
+  }, [show]);
+
   useEffect(() => {
     if (show && projectId) {
       const fetchParticipants = async () => {
@@ -172,7 +179,7 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
       setTaskData({ description: '', assigned_to: '' });
       setSelectedParticipants([]);
       setTimeout(() => {
-        onHide();
+        onHide(); // Закрытие модального окна после успеха
       }, 1500);
     } catch (e) {
       console.error('Error adding task:', e);
@@ -185,7 +192,7 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
   const handleClose = () => {
     setTaskData({ description: '', assigned_to: '' });
     setError(null);
-    setSuccess(false);
+    setSuccess(false); // Сброс состояния success при закрытии
     setLoading(false);
     setParticipants([]);
     setParticipantsError(null);
@@ -218,14 +225,14 @@ const AddTaskModal = ({ show, onHide, onTaskSubmit, projectId }) => {
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="addTaskAssignee">
-            <Form.Label>Учасники</Form.Label>
+            <Form.Label>Оберіть виконавця</Form.Label>
             <Form.Select
               name="assigned_to"
               value=""
               onChange={handleParticipantSelect}
               disabled={loading || loadingParticipants}
             >
-              <option value="">Оберіть учасника</option>
+              <option value="">Оберіть виконавця</option>
               {loadingParticipants ? (
                 <option disabled>Завантаження...</option>
               ) : (

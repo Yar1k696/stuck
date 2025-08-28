@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Spinner, Alert, Container, Row, Col, Card, Stack, Button,
-  Dropdown, Modal, Form
-} from 'react-bootstrap';
+import { Spinner, Alert, Container, Row, Col, Card, Stack, Button, Dropdown, Modal, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faFlag, faTrashAlt, faExchangeAlt, faUser 
-} from '@fortawesome/free-solid-svg-icons';
+import { faFlag, faTrashAlt, faExchangeAlt, faUser } from '@fortawesome/free-solid-svg-icons';
+import { useTaskContext } from '../TaskContext';
 
 function getCookie(name) {
   const cookieValue = document.cookie
@@ -16,12 +12,17 @@ function getCookie(name) {
   return cookieValue || '';
 }
 
-const csrfToken = getCookie('csrftoken');
+async function refreshCSRFToken() {
+  await fetch('/api/csrf/', {
+    method: 'GET',
+    credentials: 'include'
+  });
+}
 
 const TaskActionsDropdown = ({ task, currentStatus, onStatusChange, onDelete }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
-  const [newStatus, setNewStatus] = useState(currentStatus);
+  const [newStatus, setNewStatus] = useState('');
 
   const statusOptions = {
     'TODO': 'Готові до виконання',
@@ -37,12 +38,18 @@ const TaskActionsDropdown = ({ task, currentStatus, onStatusChange, onDelete }) 
       label: statusOptions[status]
     }));
 
-  const handleStatusUpdate = () => {
+  const handleStatusUpdate = async () => {
+    if (!newStatus || newStatus === currentStatus) {
+      alert('Виберіть інший статус перед збереженням.');
+      return;
+    }
+    await refreshCSRFToken();
     onStatusChange(task.id, newStatus);
     setShowStatusModal(false);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
+    await refreshCSRFToken();
     onDelete(task.id);
     setShowDeleteModal(false);
   };
@@ -50,11 +57,7 @@ const TaskActionsDropdown = ({ task, currentStatus, onStatusChange, onDelete }) 
   return (
     <>
       <Dropdown>
-        <Dropdown.Toggle 
-          variant="link" 
-          className="p-0 text-dark task-action-toggle" 
-          style={{ fontSize: '24px' }}
-        >
+        <Dropdown.Toggle variant="link" className="p-0 text-dark task-action-toggle" style={{ fontSize: '24px' }}>
           …
         </Dropdown.Toggle>
 
@@ -85,6 +88,7 @@ const TaskActionsDropdown = ({ task, currentStatus, onStatusChange, onDelete }) 
               value={newStatus}
               onChange={(e) => setNewStatus(e.target.value)}
             >
+              <option value="">Оберіть новий статус</option>
               {availableStatuses.map(option => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -136,7 +140,7 @@ const TaskColumn = ({ title, tasks, status, onStatusChange, onDelete, users }) =
   const getAssigneeName = (assignedToId) => {
     if (!assignedToId) return '*';
     const user = users.find(user => user.id === assignedToId);
-    return user ? user.username : '*';
+    return user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || '*' : '*';
   };
 
   return (
@@ -149,7 +153,7 @@ const TaskColumn = ({ title, tasks, status, onStatusChange, onDelete, users }) =
           <Card key={task.id} className="task mb-3">
             <Card.Body>
               <div className="d-flex justify-content-end mb-2" style={{ marginTop: '-10px' }}>
-                <TaskActionsDropdown 
+                <TaskActionsDropdown
                   task={task}
                   currentStatus={status}
                   onStatusChange={onStatusChange}
@@ -172,18 +176,21 @@ const TaskColumn = ({ title, tasks, status, onStatusChange, onDelete, users }) =
             </Card.Body>
           </Card>
         ))}
-        {safeTasks.length === 0 && <p className="text-muted text-center task-empty">Немає завдань у цій колонці.</p>}
+        {safeTasks.length === 0 && (
+          <p className="text-muted text-center task-empty">Немає завдань у цій колонці.</p>
+        )}
       </Card.Body>
     </Card>
   );
 };
 
-const TasksBoard = ({ projectId, userId, refreshTasks }) => {
+const TasksBoard = ({ projectId, refreshTasks, setTaskAction }) => {
   const [allTasks, setAllTasks] = useState([]);
   const [groupedTasks, setGroupedTasks] = useState({});
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Изначально false
   const [error, setError] = useState(null);
+  const { setTasks } = useTaskContext();
 
   const statusColumnMap = {
     'TODO': 'Готові до виконання',
@@ -195,42 +202,36 @@ const TasksBoard = ({ projectId, userId, refreshTasks }) => {
   const columnOrder = Object.entries(statusColumnMap);
 
   const fetchTasks = async () => {
+    if (!projectId) {
+      setLoading(false); // Сбрасываем загрузку, если projectId отсутствует
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      let url;
-      if (projectId) {
-        url = `/api/tasks/by-project/${projectId}/`;
-      } else {
-        url = '/api/tasks/';
-        if (userId) {
-          url += `?user=${userId}`;
-        }
-      }
-
+      const url = `/api/tasks/by-project/${projectId}/`;
       const response = await fetch(url, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
         credentials: 'include',
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
         if (response.status === 403) {
           setError('Доступ заборонено. Будь ласка, увійдіть в систему.');
         } else {
-          throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
       } else {
         const data = await response.json();
         const normalizedTasks = data.map(task => ({
           ...task,
-          status: task.status ? task.status.toUpperCase() : 'TODO' // Нормализация статуса
+          status: task.status ? task.status.toUpperCase() : 'TODO'
         }));
         setAllTasks(normalizedTasks);
+        setTasks(normalizedTasks); // Синхронизация с контекстом
       }
     } catch (e) {
-      console.error("Failed to fetch tasks:", e);
       setError(e.message || "Не вдалося завантажити список завдань.");
       setAllTasks([]);
     } finally {
@@ -242,17 +243,13 @@ const TasksBoard = ({ projectId, userId, refreshTasks }) => {
     try {
       const response = await fetch('/api/users/', {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
         credentials: 'include',
       });
-      if (!response.ok) {
-        throw new Error('Не вдалося завантажити користувачів');
-      }
+      if (!response.ok) throw new Error('Не вдалося завантажити користувачів');
       const data = await response.json();
-      console.log('Users fetched:', data);
       setUsers(data);
     } catch (e) {
-      console.error('Error fetching users:', e);
       setError('Не вдалося завантажити користувачів');
     }
   };
@@ -261,21 +258,14 @@ const TasksBoard = ({ projectId, userId, refreshTasks }) => {
     try {
       const response = await fetch(`/api/tasks/edit/${taskId}/`, {
         method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken
-        },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
         credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (!response.ok) {
-        throw new Error('Не вдалося оновити статус завдання');
-      }
-
+      if (!response.ok) throw new Error('Не вдалося оновити статус завдання');
       fetchTasks();
     } catch (error) {
-      console.error('Error updating task status:', error);
       alert(error.message);
     }
   };
@@ -284,64 +274,39 @@ const TasksBoard = ({ projectId, userId, refreshTasks }) => {
     try {
       const response = await fetch(`/api/tasks/del/${taskId}/`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
         credentials: 'include',
       });
 
-      if (!response.ok) {
-        throw new Error('Не вдалося видалити завдання');
+      if (!response.ok) throw new Error('Не вдалося видалити завдання');
+      const taskToRemove = allTasks.find(task => task.id === taskId);
+      if (taskToRemove && taskToRemove.assigned_to) {
+        setTaskAction({ type: 'remove', taskId, assignedTo: taskToRemove.assigned_to });
       }
-
-      fetchTasks();
+      fetchTasks(); // Перезагрузка задач
     } catch (error) {
-      console.error('Error deleting task:', error);
       alert(error.message);
     }
   };
 
   useEffect(() => {
-    if (projectId || userId) {
+    if (projectId) {
       fetchTasks();
       fetchUsers();
+    } else {
+      setLoading(false); // Сбрасываем загрузку при отсутствии projectId
+      setAllTasks([]);
     }
-  }, [projectId, userId, refreshTasks]);
+  }, [projectId, refreshTasks]);
 
   useEffect(() => {
-    if (allTasks && Array.isArray(allTasks)) {
-      const tasksByStatus = {
-        'TODO': [],
-        'IN_PROGRESS': [],
-        'NEEDS_REVIEW': [],
-        'DONE': []
-      };
-  
-      allTasks.forEach(task => {
-        const status = task.status in statusColumnMap ? task.status : 'TODO';
-        if (tasksByStatus[status]) {
-          tasksByStatus[status].push(task);
-        }
-      });
-      
-      setGroupedTasks(tasksByStatus);
-    } else {
-      setGroupedTasks({
-        'TODO': [],
-        'IN_PROGRESS': [],
-        'NEEDS_REVIEW': [],
-        'DONE': []
-      });
-    }
+    const tasksByStatus = { 'TODO': [], 'IN_PROGRESS': [], 'NEEDS_REVIEW': [], 'DONE': [] };
+    allTasks.forEach(task => {
+      const status = statusColumnMap[task.status] ? task.status : 'TODO';
+      tasksByStatus[status].push(task);
+    });
+    setGroupedTasks(tasksByStatus);
   }, [allTasks]);
-
-  if (loading) {
-    return (
-      <Container className="d-flex justify-content-center mt-5 task-board-loading">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Завантаження завдань...</span>
-        </Spinner>
-      </Container>
-    );
-  }
 
   if (error) {
     return (
@@ -367,6 +332,13 @@ const TasksBoard = ({ projectId, userId, refreshTasks }) => {
           </Col>
         ))}
       </Row>
+      {loading && (
+        <div className="d-flex justify-content-center mt-5 task-board-loading">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Завантаження завдань...</span>
+          </Spinner>
+        </div>
+      )}
     </Container>
   );
 };
